@@ -20,7 +20,7 @@ class BearerTokenMiddleware
         $attemptsKey = "token_attempts_{$ip}";
 
         if (Cache::has($blockedKey)) {
-            return response()->json(['message' => 'IP blocked. Try again later.'], Response::HTTP_FORBIDDEN);
+            return response()->json(['message' => 'IP adresiniz geçici olarak engellendi. Lütfen daha sonra tekrar deneyin.'], Response::HTTP_FORBIDDEN);
         }
 
         $authHeader = $request->header('Authorization');
@@ -29,22 +29,25 @@ class BearerTokenMiddleware
             $token = $matches[1];
         }
 
-        if ($token === $this->validToken) {
-            Cache::forget($attemptsKey);
-            return $next($request);
+        if ($token !== $this->validToken) {
+            if (!Cache::has($attemptsKey)) {
+                Cache::put($attemptsKey, 1, $this->blockMinutes * 60);
+                $attempts = 1;
+            } else {
+                $attempts = Cache::increment($attemptsKey);
+            }
+
+            if ($attempts >= $this->maxAttempts) {
+                Cache::put($blockedKey, true, $this->blockMinutes * 60);
+                Cache::forget($attemptsKey);
+                return response()->json(['message' => 'Çok fazla hatalı deneme yaptınız. IP adresiniz geçici olarak engellendi.'], Response::HTTP_FORBIDDEN);
+
+            }
+
+            return response()->json(['message' => 'Yetkisiz erişim. Geçersiz veya eksik token.'], Response::HTTP_UNAUTHORIZED);
         }
 
-        $attempts = Cache::increment($attemptsKey);
-        if ($attempts === 1) {
-            Cache::put($attemptsKey, 1, $this->blockMinutes * 60);
-        }
-
-        if ($attempts >= $this->maxAttempts) {
-            Cache::put($blockedKey, true, $this->blockMinutes * 60);
-            Cache::forget($attemptsKey);
-            return response()->json(['message' => 'IP blocked due to too many invalid attempts.'], Response::HTTP_FORBIDDEN);
-        }
-
-        return response()->json(['message' => 'Unauthorized.'], Response::HTTP_UNAUTHORIZED);
+        Cache::forget($attemptsKey);
+        return $next($request);
     }
 }
