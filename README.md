@@ -2,8 +2,10 @@
 
 1. Repoyu klonlayın:
    ```
-   git clone <repo-link>
-   cd <repo-klasörü>
+   git clone https://github.com/Mehmet-Alemdar/news-app.git
+   ```
+   ```
+   cd news-app
    ```
 
 2. Bağımlılıkları yükleyin:
