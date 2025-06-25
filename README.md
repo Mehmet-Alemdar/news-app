@@ -24,19 +24,21 @@
    php artisan key:generate
    ```
 
-5. Migration ve seed işlemlerini başlatın:
+5. Migration işlemlerini başlatın:
    ```
-   php artisan migrate --seed
-   ```
-
-6. Storage link oluşturun:
-   ```
-   php artisan storage:link
+   php artisan migrate
    ```
 
+6. **Dikkat:** Seeder otomatik olarak 250.000 haber kaydı oluşturacaktır. Bu işlem sisteminize göre uzun sürebilir.
+   
+   Seed işlemini başlatmak için:
+   ```
+   php artisan db:seed --class=NewsSeeder
+   ```
+   
 7. Sunucuyu başlatın:
    ```
    php artisan serve
    ```
 
-> Not: Seeder otomatik olarak 250.000 haber kaydı oluşturacaktır. Bu işlem sisteminize göre zaman alabilir.
+> Not: Çok büyük veri oluşturulacağı için, işlem sırasında bilgisayarınızın kaynaklarını gözlemlemeniz önerilir.

@@ -52,7 +52,7 @@ class NewsController extends Controller
                 'errors' => $validator->errors(),
             ], 422);
         }
-        
+
         $validated = $validator->validated();
 
         if ($request->hasFile('image')) {
