@@ -3,6 +3,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreNewsRequest;
 use App\Models\News;
+use Illuminate\Http\Request;
+use App\Validators\NewsValidator;
 
 class NewsController extends Controller
 {
@@ -40,9 +42,18 @@ class NewsController extends Controller
         return response()->json($news);
     }
 
-    public function store(StoreNewsRequest $request)
+    public function store(Request $request)
     {
-        $validated = $request->validated();
+        $validator = NewsValidator::validate($request->all());
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Doğrulama hataları var.',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+        
+        $validated = $validator->validated();
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
