@@ -3,8 +3,6 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreNewsRequest;
 use App\Models\News;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
 
 class NewsController extends Controller
 {
@@ -48,15 +46,11 @@ class NewsController extends Controller
 
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            $img = Image::make($image->getRealPath());
-            $img->resize(800, 800, function ($constraint) {
-                $constraint->aspectRatio();
-                $constraint->upsize();
-            });
-            $filename = uniqid() . '.webp';
-            $path = 'news_images/' . $filename;
-            Storage::disk('public')->put($path, (string) $img->encode('webp', 90));
-            $validated['image'] = $path;
+
+            $filename = uniqid('news_') . '.' . $image->getClientOriginalExtension();
+            $path = $image->storeAs('news_images', $filename, 'public');
+
+            $validated['image'] = 'storage/' . $path;
         }
 
         $news = News::create($validated);
